@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -89,64 +88,27 @@ func createMessage(w http.ResponseWriter, r *http.Request) error {
 
 }
 
-type FileContentMessage struct {
-	ID      int    `json:"id"`
-	Message string `json:"message"`
-}
 
-type FileContentMessageData struct {
-	Data []FileContentMessage `json:"data"`
-}
-
-func renderBadRequest(message string) *ErrResponse {
-	return &ErrResponse{
-		HttpStatusCode: 400,
-		StatusText:     message,
-	}
-}
 
 func getMessage(w http.ResponseWriter, r *http.Request) error {
 
-	content, err := os.ReadFile("./static/messages.json")
+	content, err := ioutil.ReadFile("./static/messages.json")
 	if err != nil {
-		render.Render(w, r, &ErrResponse{
+		render.Render(w,r,&ErrResponse{
 			Err:            err,
 			HttpStatusCode: 404,
 			StatusText:     "Not found",
-			ErrorText:      err.Error(),
+			ErrorText:      err.Error()})
 		})
-		return nil
 	}
 
-	var messages FileContentMessageData
-	json.Unmarshal(content, &messages)
 
-	idQuery := r.URL.Query().Get("id")
-	if idQuery == "" {
-		render.Render(w, r, renderBadRequest("Invalid id"))
-		return nil
+	message := &SomeMessage{
+		ID:      12,
+		Message: "hellow world",
 	}
 
-	id, err := strconv.Atoi(idQuery)
-	if err != nil || id < 0 {
-		render.Render(w, r, renderBadRequest("Invalid id"))
-		return nil
-	}
-
-	for i := range messages.Data {
-		if messages.Data[i].ID == id {
-			render.Render(w, r, &SomeMessage{
-				ID:      messages.Data[i].ID,
-				Message: messages.Data[i].Message,
-			})
-			return nil
-		}
-	}
-
-	render.Render(w, r, &ErrResponse{
-		HttpStatusCode: 404,
-		StatusText:     "Not found",
-	})
+	render.Render(w, r, message)
 
 	return nil
 }
