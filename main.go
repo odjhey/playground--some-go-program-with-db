@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/halakata/go-pokemon-api/db"
 	"github.com/halakata/go-pokemon-api/http_api"
+
+	_ "github.com/lib/pq"
 )
 
 type Handler func(w http.ResponseWriter, r *http.Request) error
@@ -21,13 +27,37 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	r := getRouter()
-	http.ListenAndServe(":8080", r)
+	addr := ":8080"
 
+	dbUser, dbPassword, dbName :=
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB")
+
+	database, err := db.Init(dbUser, dbPassword, dbName)
+	if err != nil {
+		log.Fatalf("Could not set up database: %v", err)
+	}
+	defer database.Conn.Close()
+
+	dbInstance = database
+	r := getRouter()
+	http.ListenAndServe(addr, r)
+
+}
+
+var dbInstance db.Database
+
+func DbContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), db.DbContextKey, dbInstance)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func getRouter() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(DbContext)
 	r.Use(middleware.Logger)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
@@ -38,6 +68,9 @@ func getRouter() *chi.Mux {
 	r.Method("GET", "/x", Handler(http_api.SomeHandler))
 	r.Method("GET", "/message", Handler(http_api.GetMessage))
 	r.Method("POST", "/message", Handler(http_api.CreateMessage))
+	r.Method("GET", "/message-db", Handler(http_api.GetMessageFromDb))
 	return r
 
 }
+
+// DO WE NEED TO ADD `func Stop` for graceful?

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/render"
+	"github.com/halakata/go-pokemon-api/db"
 	"github.com/halakata/go-pokemon-api/models"
 )
 
@@ -97,5 +98,38 @@ func SomeHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	w.Write([]byte("some name " + strconv.Itoa(id)))
+	return nil
+}
+
+func GetMessageFromDb(w http.ResponseWriter, r *http.Request) error {
+
+	dbInstance := r.Context().Value(db.DbContextKey).(db.Database)
+
+	idQuery := r.URL.Query().Get("id")
+	if idQuery == "" {
+		render.Render(w, r, RenderBadRequest("Invalid id"))
+		return nil
+	}
+
+	id, err := strconv.Atoi(idQuery)
+	if err != nil || id < 0 {
+		render.Render(w, r, RenderBadRequest("Invalid id"))
+		return nil
+	}
+
+	row, err := dbInstance.GetMessageById(id)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HttpStatusCode: 404,
+			StatusText:     "Not found",
+			ErrorText:      err.Error(),
+		})
+	}
+
+	render.Render(w, r, &models.SomeMessage{
+		ID:      row.ID,
+		Message: row.Message,
+	})
+
 	return nil
 }
