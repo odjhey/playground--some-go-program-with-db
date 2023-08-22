@@ -10,24 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/halakata/go-pokemon-api/models"
 )
-
-type SomeMessage struct {
-	ID      int    `json:"id"`
-	Message string `json:"message"`
-}
-
-func (s *SomeMessage) Bind(r *http.Request) error {
-	if s.Message == "" {
-		return errors.New("message is required")
-	}
-
-	return nil
-}
-
-func (s *SomeMessage) Render(w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
 
 type ErrResponse struct {
 	Err            error  `json:"-"`
@@ -77,7 +61,7 @@ func getRouter() *chi.Mux {
 
 func createMessage(w http.ResponseWriter, r *http.Request) error {
 
-	message := &SomeMessage{}
+	message := &models.SomeMessage{}
 
 	if err := render.Bind(r, message); err != nil {
 		render.Render(w, r, &ErrResponse{
@@ -140,7 +124,7 @@ func getMessage(w http.ResponseWriter, r *http.Request) error {
 
 	for i := range messages.Data {
 		if messages.Data[i].ID == id {
-			render.Render(w, r, &SomeMessage{
+			render.Render(w, r, &models.SomeMessage{
 				ID:      messages.Data[i].ID,
 				Message: messages.Data[i].Message,
 			})
