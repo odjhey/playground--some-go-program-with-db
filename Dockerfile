@@ -9,6 +9,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/go-pokemon-
 FROM alpine
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 COPY --from=builder /go/src/github.com/halakata/go-pokemon-api/build/go-pokemon-api /usr/bin/go-pokemon-api
+COPY --from=builder /go/src/github.com/halakata/go-pokemon-api/static /static
 EXPOSE 8080 8080
 ENTRYPOINT ["/usr/bin/go-pokemon-api"]
 
