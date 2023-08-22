@@ -6,23 +6,18 @@ import (
 	"log"
 )
 
-const (
-	HOST = "localhost"
-	PORT = 5432
-)
-
 const DbContextKey = "dbContext"
 
 type Database struct {
 	Conn *sql.DB
 }
 
-func Init(username, password, database string) (Database, error) {
+func Init(username, password, database, host string, port int) (Database, error) {
 
 	db := Database{}
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		HOST, PORT, username, password, database)
+		host, port, username, password, database)
 
 	conn, err := sql.Open("postgres", dsn)
 

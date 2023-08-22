@@ -42,3 +42,16 @@ func (db Database) GetMessageById(messageId int) (models.SomeMessage, error) {
 	}
 
 }
+
+func (db Database) CreateMessage(inputId int, inputMessage string) error {
+
+	var id int
+	var message string
+	query := `INSERT INTO "ta1" (id, message) VALUES ($1, $2) RETURNING id, message`
+	err := db.Conn.QueryRow(query, inputId, inputMessage).Scan(&id, &message)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

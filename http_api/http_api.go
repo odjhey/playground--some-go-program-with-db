@@ -133,3 +133,32 @@ func GetMessageFromDb(w http.ResponseWriter, r *http.Request) error {
 
 	return nil
 }
+
+func CreateMessageDb(w http.ResponseWriter, r *http.Request) error {
+
+	dbInstance := r.Context().Value(db.DbContextKey).(db.Database)
+	message := &models.SomeMessage{}
+
+	if err := render.Bind(r, message); err != nil {
+		render.Render(w, r, &ErrResponse{
+			Err:            err,
+			HttpStatusCode: 500,
+			StatusText:     "something wrong haha",
+			ErrorText:      err.Error()})
+		return nil
+	}
+
+	err := dbInstance.CreateMessage(message.ID, message.Message)
+	if err != nil {
+		render.Render(w, r, &ErrResponse{
+			HttpStatusCode: 500,
+			StatusText:     "Db failed",
+			ErrorText:      err.Error(),
+		})
+		return nil
+	}
+
+	render.Render(w, r, message)
+	return nil
+
+}

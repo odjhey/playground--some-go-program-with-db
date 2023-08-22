@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -29,12 +30,16 @@ func main() {
 
 	addr := ":8080"
 
-	dbUser, dbPassword, dbName :=
+	dbUser, dbPassword, dbName, dbHost, dbPort :=
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB")
+		os.Getenv("POSTGRES_DB"),
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT")
 
-	database, err := db.Init(dbUser, dbPassword, dbName)
+	dbPortInt, _ := strconv.Atoi(dbPort)
+
+	database, err := db.Init(dbUser, dbPassword, dbName, dbHost, dbPortInt)
 	if err != nil {
 		log.Fatalf("Could not set up database: %v", err)
 	}
@@ -69,6 +74,7 @@ func getRouter() *chi.Mux {
 	r.Method("GET", "/message", Handler(http_api.GetMessage))
 	r.Method("POST", "/message", Handler(http_api.CreateMessage))
 	r.Method("GET", "/message-db", Handler(http_api.GetMessageFromDb))
+	r.Method("POST", "/message-db", Handler(http_api.CreateMessageDb))
 	return r
 
 }
