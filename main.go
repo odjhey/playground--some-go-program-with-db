@@ -54,6 +54,12 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	r := getRouter()
+	http.ListenAndServe(":8080", r)
+
+}
+
+func getRouter() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
@@ -65,8 +71,7 @@ func main() {
 	r.Method("GET", "/x", Handler(someHandler))
 	r.Method("GET", "/message", Handler(getMessage))
 	r.Method("POST", "/message", Handler(createMessage))
-
-	http.ListenAndServe(":8080", r)
+	return r
 
 }
 
