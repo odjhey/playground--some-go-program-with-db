@@ -12,15 +12,18 @@ import (
 	"github.com/halakata/go-pokemon-api/models"
 )
 
+// FileContentMessage represents a message with an ID and content.
 type FileContentMessage struct {
 	ID      int    `json:"id"`
 	Message string `json:"message"`
 }
 
+// FileContentMessageData represents a collection of FileContentMessage objects.
 type FileContentMessageData struct {
 	Data []FileContentMessage `json:"data"`
 }
 
+// GetMessage reads a message from a JSON file and returns it.
 func GetMessage(w http.ResponseWriter, r *http.Request) error {
 
 	content, err := os.ReadFile("./static/messages.json")
@@ -67,6 +70,7 @@ func GetMessage(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// CreateMessage creates a new message and returns it.
 func CreateMessage(w http.ResponseWriter, r *http.Request) error {
 
 	message := &models.SomeMessage{}
@@ -86,6 +90,7 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) error {
 
 }
 
+// SomeHandler handles a specific type of request.
 func SomeHandler(w http.ResponseWriter, r *http.Request) error {
 	idQuery := r.URL.Query().Get("id")
 	if idQuery == "" {
@@ -101,6 +106,7 @@ func SomeHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// GetMessageFromDb retrieves a message from the database and returns it.
 func GetMessageFromDb(w http.ResponseWriter, r *http.Request) error {
 
 	dbInstance := r.Context().Value(db.DbContextKey).(db.Database)
@@ -134,6 +140,7 @@ func GetMessageFromDb(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// CreateMessageDb creates a new message in the database and returns it.
 func CreateMessageDb(w http.ResponseWriter, r *http.Request) error {
 
 	dbInstance := r.Context().Value(db.DbContextKey).(db.Database)
