@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS "ta1" (
+    id BIGINT PRIMARY KEY,
+    message TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
+);

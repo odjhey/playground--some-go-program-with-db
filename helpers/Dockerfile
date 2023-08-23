@@ -1,0 +1,11 @@
+FROM migrate/migrate
+
+WORKDIR /usr/asdf123
+COPY . .
+# ENV POSTGRES_USER         = $POSTGRES_USER
+# ENV POSTGRES_PASSWORD     = $POSTGRES_PASSWORD
+# ENV POSTGRES_HOST         = $POSTGRES_HOST
+# ENV POSTGRES_PORT         = $POSTGRES_PORT
+# ENV POSTGRES_DB           = $POSTGRES_DB
+
+ENTRYPOINT echo $POSTGRES_HOST && migrate -path ./db/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@/${POSTGRES_DB}?host=${POSTGRES_HOST} up
